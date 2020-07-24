@@ -342,36 +342,21 @@ class SubscriptionView(View):
         # Apply regional filters to the Subscriptions
         if 'filter_region' in request.GET:
 
-            # Maps values from the service table to values in the regions table in a dictionary.
-            service_region_map = {
-                'Cape Town': 'Africa',
-                'Fortaleza': 'Brazil',
-                'São Paulo': 'Brazil',
-                'Panama City': 'Panama',
-                'San Juan': 'Puerto Rico',
-                'Santiago': 'Chile',
-                'Miami': 'US',
-                'Boca Raton': 'US',
-                'USA': 'US'}
-
-            # Get selected region from template
+            #Get region name from the filter button that was clicked in the Subscriptions.html template
             selected_region = request.GET.get('filter_region')
-            filtered_services = []
 
-            # Add all services related to the region(by service_region_map dict) to the list: filtered_services
-            # "US" requires a special case since it's a country tied to cities, instead of vice-versa.
-            if selected_region == "US":
-                for key, value in service_region_map.items():
-                    if selected_region == value:
-                        filtered_services.append(key)
-            else:
-                for key in service_region_map:
-                    if selected_region == key:
-                        filtered_services.append(service_region_map[key])
+            #Retrieve the Region object from the database
+            region_object = Region.objects.get(name=selected_region)
 
-            # Pass list of services into filtering function
-            form.filter_services(filtered_services)
+            #Get the client domain from the region object(Return type is queryset)
+            client_domain = region_object.client_domains.all()
 
+            #Get the services related to the client domain(Return type is queryset)
+            client_domain_services = client_domain[0].services.all()
+
+            #Update the form's services field with the new queryset of filtered services
+            form.fields['services'].queryset = client_domain_services
+            
         if service_id is not None:
             obj = get_object_or_404(Service, id=service_id)
             self.context['object'] = obj

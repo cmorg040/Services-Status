@@ -480,38 +480,6 @@ class SubscriberDataForm(forms.ModelForm):
             attrs={"placeholder": "Email", "class": "form-control"}),
         required=True)
 
-    def get_service_names(self):
-        """
-        Method to retrieve an array of service names
-        """
-
-        service_names = []
-        for service in self.fields['services'].queryset:
-            service_names.append(service.name)
-
-        return service_names
-
-    def filter_services(self, servs):
-        """
-        Method to filter the regions being retrieved and stored in the services variable
-        """
-        # If servs is empty, filter will return no selections
-        if not servs:
-            # Replace this with an error that will show up on the template.
-            print("No matches for this Services filter")
-            self.fields['services'].queryset = Service.objects.none()
-
-        # Set filtered services to initial value of servs, then
-        else:
-            filtered_services = Service.objects.filter(name__icontains=servs[0])
-            qs1 = Service.objects.none()
-
-            # Iterate through all values passed to servs and add them to the form's queryset.
-            for serv in servs:
-                qs1 = Service.objects.filter(name__icontains=serv)
-                self.fields['services'].queryset = qs1 | filtered_services
-
-
     def check_mail_domain(self):
         """
         Method to check if the email provided belong to
